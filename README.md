@@ -1,5 +1,6 @@
 # Numenera
-Game file analysis tools for Tides of Numenera written in Python3.
+Game file analysis tools for Tides of Numenera written in Python3. For Steam in Windows, these files can be found under
+`\Programs\Steam\steamapps\common\Torment Tides of Numenera\WIN\TidesOfNumenera\StreamingAssets\data`
 
 ## Requirements
 Both scripts need `lxml` to function, `word_count.py` tries to be smart and requires the Natural Language Toolkit (`nltk`) as well.
