@@ -105,8 +105,8 @@ def count_file(str_path):
 ################################################################################
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-            description=r"Count the in-game words of Tides on Numenera. "\
-                        r"These files located at 'TidesOfNumenera_Data\StreamingAssets\data\localized\en\text'")
+            description="Count the in-game words of Tides on Numenera. "\
+                        "These files located at 'TidesOfNumenera_Data/StreamingAssets/data/localized/en/text'")
     parser.add_argument("path", nargs="+",
             help="Top-level directories with {} files inside, or individual files.".format(FILE_EXT))
     parser.add_argument("-v", "--verbose", action="store_true")
