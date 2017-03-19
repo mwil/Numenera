@@ -15,12 +15,13 @@ g_sentence_set = set()
 
 FILE_EXT = ".stringtable"
 
+# Certain nodes do not represent in-game text, skip the most common ones
 BLACK_LIST = (
-    r"Script Node \d",
-    r"Trigger Conv Node \d",
-    r"Follow-up PQ",
-    r"Bank \d",
-    r"[DEBUG]",
+    r"^Script Node \d",
+    r"^Trigger Conv Node \d",
+    r"^Follow-up PQ",
+    r"^Bank \d",
+    r"^[DEBUG]",
     r"^{.*}$"
 )
 
@@ -46,9 +47,10 @@ def count_file(str_path):
     global args, g_stats, g_sentence_set
 
     conv_path = str_path.replace("localized/en/text/", "").replace(FILE_EXT, ".conversation")
+    quest_path = str_path.replace("localized/en/text/", "").replace(FILE_EXT, ".quest")
 
-    # Count only files that also have a .conversation control file!
-    if not os.path.isfile(conv_path):
+    # Count only files that also have a .conversation/.quest control file!
+    if not (os.path.isfile(conv_path) or os.path.isfile(quest_path)):
         return
 
     l_stats = defaultdict(int)
@@ -75,6 +77,7 @@ def count_file(str_path):
         # Trying to de-duplicate on a sentence level, collect the split
         # sentences in a set. Sometimes paragraphs are pasted together,
         # on a per-file sentence level the pruning should be good.
+        # added: global sentence set!
         sentences = tokenizer.tokenize(dt.text)
         sentence_set.update(sentences)
 
@@ -129,7 +132,7 @@ if __name__ == "__main__":
             sum([len(sentence.split()) for sentence in g_sentence_set]), len(g_sentence_set)))
 
     for (x, y) in ((0, 5), (5, 10), (10, 20), (20, 1000)):
-        print("Sentences with {} to {} words: {:,} with {:,} words".format(x, y-1,
+        print("Sentences with {} to {} words: {:,} with {:,} words".format(x, y,
             len([sentence for sentence in g_sentence_set if x<len(sentence.split())<=y]),
             len([word for sentence in g_sentence_set for word in sentence.split() if x<len(sentence.split())<=y])))
 
