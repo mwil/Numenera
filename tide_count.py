@@ -3,6 +3,7 @@
 import argparse
 import os
 import pprint
+import re
 
 from collections import defaultdict
 from lxml import etree
@@ -26,7 +27,8 @@ def traverse(rootdir):
 def count_file(filepath):
     global args, g_col_stats, g_col_weighted, g_multi
 
-    stringpath = "localized/en/text/" + filepath.replace(".conversation", ".stringtable")
+    stringpath = re.sub("conversations", "localized/en/text/conversations", filepath)
+    stringpath = stringpath.replace(".conversation", ".stringtable")
 
     if not os.path.isfile(stringpath):
         return
@@ -57,7 +59,7 @@ def count_file(filepath):
 
                 # Find the corresponding in-game string in the localized files
                 nodeid = script.findtext("../NodeID")
-                string = str_tree.xpath("//ID[text()='{}']/../DefaultText".format(nodeid))[0].text
+                string = str_tree.xpath("//ID[text()='{}']/../DefaultText/text()".format(nodeid))[0]
                 print("{} [nodeid={}]".format(string, nodeid))
                 print()
 
