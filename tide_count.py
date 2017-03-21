@@ -14,8 +14,9 @@ g_col_multi = defaultdict(int)
 FILE_EXT = ".conversation"
 TIDE_WEIGHTS = {"Tiny": 1, "Small":2, "Moderate":3, "Huge":5}
 
-xpath_find_tide_raise  = etree.XPath("ScriptCall/Data/FullName[starts-with(text(), 'Void RaisePlayerTide')]")
-xpath_find_call_params = etree.XPath("../Parameters/string/text()")
+xpath_find_raiseTide_Data    = etree.XPath("ScriptCall/Data/FullName[starts-with(text(), 'Void RaisePlayerTide')]/..")
+xpath_text_scriptCall_Params = etree.XPath("Parameters/string/text()")
+xpath_text_DefTxt_by_nodeid  = etree.XPath("//ID[text()=$nodeid]/../DefaultText/text()")
 
 ################################################################################
 def traverse(rootdir):
@@ -35,20 +36,19 @@ def count_file(filepath):
     if not os.path.isfile(stringpath):
         return
 
-    con_tree = etree.parse(filepath)
-    str_tree = etree.parse(stringpath)
-
+    conv_tree = etree.parse(filepath)
+    str_tree  = etree.parse(stringpath)
 
     # All communication nodes have an <OnEnterScripts> element that is executed when the option was chosen.
     # We search for all <ScriptCall> elements that call RaisePlayerTide(), and check their contents.
-    for script in con_tree.findall("//OnEnterScripts"):
+    for enter_script in conv_tree.findall("//OnEnterScripts"):
         tide_changes = []
-        calls = xpath_find_tide_raise(script)
+        raise_calls = xpath_find_raiseTide_Data(enter_script)
 
-        # `calls` can also be empty when the script calls other functions,
+        # `raise_calls` can also be empty when the script calls other functions,
         # this just skips them automatically, otherwise collect all tide changes
-        for call in calls:
-            color, amount = xpath_find_call_params(call)
+        for call in raise_calls:
+            color, amount = xpath_text_scriptCall_Params(call)
 
             tide_changes.append((color, amount))
 
@@ -59,12 +59,10 @@ def count_file(filepath):
                 print("{}: {} -> {}".format(filepath, color, amount))
 
                 # Find the corresponding in-game string in the localized files
-                nodeid = script.findtext("../NodeID")
-                string = str_tree.xpath("//ID[text()='{}']/../DefaultText/text()".format(nodeid))[0]
-                print("{} [nodeid={}]".format(string, nodeid))
-                print()
+                nodeid = enter_script.findtext("../NodeID")
+                print("{[0]} [nodeid={}]\n".format(xpath_DefTxt_by_nodeid(str_tree, nodeid=nodeid), nodeid))
 
-        if len(calls) > 1:
+        if len(raise_calls) > 1:
             # Several tides are manipulated in a single node
             g_col_multi[frozenset([col for col, _ in tide_changes])] += 1
 
@@ -75,10 +73,8 @@ def count_file(filepath):
                 print("{}: {}".format(filepath, tide_changes))
 
                 # Find the corresponding in-game string in the localized files
-                nodeid = script.findtext("../NodeID")
-                string = str_tree.xpath("//ID[text()='{}']/../DefaultText".format(nodeid))[0].text
-                print("{} [nodeid={}]".format(string, nodeid))
-                print()
+                nodeid = enter_script.findtext("../NodeID")
+                print("{[0]} [nodeid={}]\n".format(xpath_DefTxt_by_nodeid(str_tree, nodeid=nodeid), nodeid))
 
 
 ################################################################################
