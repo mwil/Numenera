@@ -138,6 +138,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+
     for path in args.path:
         if os.path.isfile(path):
             if path.endswith(FILE_EXT):
@@ -146,6 +147,7 @@ if __name__ == "__main__":
                 print("Ignoring file {}, unexpected file type!".format(path))
         else:
             traverse(path)
+
 
     print("-"*30, "Results", "-"*30)
     print(RESULT_STR.format_map(g_stats))
